@@ -37,14 +37,14 @@ public class NameParserTest  {
             "    Dr. Bobbi-Jo Mary Thomas-O'Brien, MD",
             "    Acres, Jim"  ,
             "Mr. John William Doe Jr., B.Sc",
-            "Mr. John William Doe Jr. BSc, PHD",
-            "Mr. John William Doe Jr., BSc, DDS",
+            "Mister John William Doe Jr. BSc, PHD",
+            "Misses John William Doe Jr., BSc, DDS",
             "Peter O Malley",    // TODO : need to set ambiguity flag for this case.
             "Peter O Malley,  B.Sc Phd",
-            "Peter O Malley",
-            "Peter O Malley",
+            "Sir O Sis, LLB",
+            "Hon Judge Bob Baker",
             "Smith, John Bob Jr.",
-            "Peter O. Malley",  // not sure how to treat "O".
+            "judge peter O. Malley",  // not sure how to treat "O".
             "Peter O'Malley",
             "Peter O' Malley",
             "Ms. celia Cruz",

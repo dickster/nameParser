@@ -16,7 +16,7 @@ package parser;
 
 import java.io.*;
 import java.util.*;
-import demo.Name;
+import parser.Name;
 
 
 public class NameParser {
@@ -35,18 +35,19 @@ public class NameParser {
         result = split(result,"&");
         result = split(result,"'n");
         result = split(result,";",false);
-        if (result.size()>1) System.out.println(text + " : broken down into names --> " + result);
+        if (result.size()>1) System.out.println("breaking down names " + text + " --> " + result);
         NameResult nameResult = new NameResult();
         init();
         for (String name:result) {
             try {
-               System.out.print("parsing single name: " + name);
+               System.out.println("parsing : " + name);
                 nameResult = parseName(name);
                 names.push(new Name());
             } catch (ParseException e) {
                 e.printStackTrace();
                 return new NameResult().error(text);
             }
+
         }
         nameResult.collate();
         return nameResult;
@@ -70,7 +71,7 @@ public class NameParser {
         text = text.trim();
         ReInit(new StringReader(text));
         _$$parse();
-        System.out.println("!");
+
         return names.collate();
     }
 
@@ -105,6 +106,7 @@ TOKEN:
     <AND:"+"|"&"|"'n"|"and"> |
     // prefixes......
     <HON:"hon"(".")?("orable")?> |
+    <JUDGE:"judge"> |
     <MR:"mister"|"mr"(".")?> |
     <MRS:"misses"|"mrs"(".")?> |
     <MISS:"miss"(".")?> |
@@ -222,13 +224,13 @@ void and() : {} {
 
 void salutation() : {}
 {
-    (<ESTATE_OF>|<HON>|<MR>|<MRS>|<MISS>|<MS>|<SIR>|<MADAM>|<ATTY>|<DOCTOR>|<PROF>)
-        {getName().addSalutation(token.image);}
+    (<ESTATE_OF>|<JUDGE>|<HON>|<MR>|<MRS>|<MISS>|<MS>|<SIR>|<MADAM>|<ATTY>|<DOCTOR>|<PROF>)
+        {getName().addSalutation(token.image, token.kind);}
 }
 
 void relation() : {} {
     (<SECOND>|<THIRD>|<FOURTH>|<SENIOR>|<JUNIOR>|<ROMAN_NUMERALS>)
-        {getName().addRelation(token.image);}
+        {getName().addRelation(token.image, token.kind);}
 }
 
 void title() : {}
@@ -238,11 +240,11 @@ void title() : {}
 
 void companyTitle() : {}
 {
-    (<INC>|<CO>|<LTD>|<TM>) {getCompanyName().addTitle(token.image);}
+    (<INC>|<CO>|<LTD>|<TM>) {getCompanyName().addTitle(token.image, token.kind);}
 }
 void personalTitle() : {}
 {
-    (<LLB>|<DDS>|<DMD>|<ESQ>|<JD>|<BSC>|<PHD>|<BBA>|<MBA>|<MD>|<CP>){getName().addTitle(token.image);}
+    (<LLB>|<DDS>|<DMD>|<ESQ>|<JD>|<BSC>|<PHD>|<BBA>|<MBA>|<MD>|<CP>){getName().addTitle(token.image, token.kind);}
 }
 
 
@@ -256,7 +258,7 @@ void name() : {}
 
 void nameRoot() : {}
 {
-    (<NAME_WITH_NUMBERS>) { getName().add(token.image); }
+    (<NAME_WITH_NUMBERS>) { getName().addName(token.image, token.kind); }
 }
 
 void namePrefix() : {}
@@ -268,14 +270,14 @@ void namePrefix() : {}
 
 void nickName() : {}
 {
-    (<SINGLE_QUOTED_NICK_NAME>|<QUOTED_NICK_NAME>|<PAREN_NICK_NAME>) { getName().addNickName(token.image); }
+    (<SINGLE_QUOTED_NICK_NAME>|<QUOTED_NICK_NAME>|<PAREN_NICK_NAME>) { getName().addNickName(token.image, token.kind); }
 }
 
 
 
 void companyName() : {}
 {
-    (<NAME_WITH_NUMBERS>) { getCompanyName().add(token.image); }
+    (<NAME_WITH_NUMBERS>) { getCompanyName().addName(token.image, token.kind); }
 }
 
 

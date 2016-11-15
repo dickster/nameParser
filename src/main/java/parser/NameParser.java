@@ -25,12 +25,12 @@ public class NameParser implements NameParserConstants {
         result = split(result,"&");
         result = split(result,"'n");
         result = split(result,";",false);
-        if (result.size()>1) System.out.println(text + " : broken down into names --> " + result);
+        if (result.size()>1) System.out.println("breaking down names " + text + " --> " + result);
         NameResult nameResult = new NameResult();
         init();
         for (String name:result) {
             try {
-               System.out.print("parsing single name: " + name);
+               System.out.print("parsing : " + name);
                 nameResult = parseName(name);
                 names.push(new Name());
             } catch (ParseException e) {
@@ -257,7 +257,7 @@ names.peek().endParse();
       jj_consume_token(-1);
       throw new ParseException();
     }
-getName().addSalutation(token.image);
+getName().addSalutation(token.image, token.kind);
   }
 
   final public void relation() throws ParseException {
@@ -277,7 +277,7 @@ getName().addSalutation(token.image);
       jj_consume_token(-1);
       throw new ParseException();
     }
-getName().addRelation(token.image);
+getName().addRelation(token.image, token.kind);
   }
 
   final public void title() throws ParseException {
@@ -304,7 +304,7 @@ getName().addRelation(token.image);
       jj_consume_token(-1);
       throw new ParseException();
     }
-getCompanyName().addTitle(token.image);
+getCompanyName().addTitle(token.image, token.kind);
   }
 
   final public void personalTitle() throws ParseException {
@@ -334,7 +334,7 @@ getCompanyName().addTitle(token.image);
       jj_consume_token(-1);
       throw new ParseException();
     }
-getName().addTitle(token.image);
+getName().addTitle(token.image, token.kind);
   }
 
   final public void name() throws ParseException {
@@ -357,7 +357,7 @@ getName().addTitle(token.image);
 
   final public void nameRoot() throws ParseException {
     jj_consume_token(NAME_WITH_NUMBERS);
-getName().add(token.image);
+getName().addName(token.image, token.kind);
   }
 
   final public void namePrefix() throws ParseException {
@@ -433,12 +433,12 @@ getName().addNameButPossiblyPrefix(token.image, token.kind);
       jj_consume_token(-1);
       throw new ParseException();
     }
-getName().addNickName(token.image);
+getName().addNickName(token.image, token.kind);
   }
 
   final public void companyName() throws ParseException {
     jj_consume_token(NAME_WITH_NUMBERS);
-getCompanyName().add(token.image);
+getCompanyName().addName(token.image, token.kind);
   }
 
   private boolean jj_2_1(int xla)
