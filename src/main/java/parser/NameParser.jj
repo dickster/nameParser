@@ -1,0 +1,284 @@
+options
+{
+    LOOKAHEAD=4;
+    FORCE_LA_CHECK=true;
+    STATIC=false;
+    IGNORE_CASE=true;
+    USER_TOKEN_MANAGER=false;
+    USER_CHAR_STREAM=false;
+//    DEBUG_PARSER=true;
+//   DEBUG_LOOKAHEAD=true;
+//   DEBUG_TOKEN_MANAGER=true;
+}
+
+PARSER_BEGIN(NameParser)
+package parser;
+
+import java.io.*;
+import java.util.*;
+import demo.Name;
+
+
+public class NameParser {
+
+    NameResult names;
+
+    public NameParser() {
+        this(new ByteArrayInputStream("".getBytes()));
+    }
+
+// TODO : refactor this splitting crap code.   use another .jj file?
+    public NameResult parseNames(String text) {
+        List<String> result = Lists.newArrayList(text);
+        result = split(result,"and");
+        result = split(result, "[+]");
+        result = split(result,"&");
+        result = split(result,"'n");
+        result = split(result,";",false);
+        if (result.size()>1) System.out.println(text + " : broken down into names --> " + result);
+        NameResult nameResult = new NameResult();
+        init();
+        for (String name:result) {
+            try {
+               System.out.print("parsing single name: " + name);
+                nameResult = parseName(name);
+                names.push(new Name());
+            } catch (ParseException e) {
+                e.printStackTrace();
+                return new NameResult().error(text);
+            }
+        }
+        nameResult.collate();
+        return nameResult;
+    }
+
+    private List<String> split(List<String> names, String regex, boolean whitespace) {
+        if (whitespace) regex = "\\s+"+regex+"\\s+";
+        List<String> result = Lists.newArrayList();
+        for (String name:names) {
+            result.addAll(Lists.newArrayList(name.split(regex)));
+        }
+        return result;
+    }
+
+    private List<String> split(List<String> names, String regex) {
+        return split(names, regex, true);
+    }
+
+
+    private NameResult parseName(String text) throws ParseException, TokenMgrError {
+        text = text.trim();
+        ReInit(new StringReader(text));
+        _$$parse();
+        System.out.println("!");
+        return names.collate();
+    }
+
+    private void init() {
+        names = new NameResult();
+        names.push(new Name());
+    }
+
+    public Name getName() {
+        return names.peek();
+    }
+
+    public Name getCompanyName() {
+        return getName().asCompany();
+    }
+
+}
+PARSER_END(NameParser)
+
+SKIP :
+{
+    " "
+    | "\t"
+    | "\r"
+    | "\n"
+}
+
+
+TOKEN:
+{
+    <COMMA:","> |
+    <AND:"+"|"&"|"'n"|"and"> |
+    // prefixes......
+    <HON:"hon"(".")?("orable")?> |
+    <MR:"mister"|"mr"(".")?> |
+    <MRS:"misses"|"mrs"(".")?> |
+    <MISS:"miss"(".")?> |
+    <MS:"ms"(".")?> |
+    <MADAM:("madam"|"maam"|"mdm"(".")?|"mm"(".")?)> |
+    <SIR:"sir"> |
+    <ATTY:"atty"(".")?> |
+    <PROF:"prof"(".")?> |
+    <DOCTOR:"doctor"|"dr"(".")?> |
+    // for compound last names....
+    <BAR:"bar"> |
+    <BEN:"ben"> |
+    <BIN:"bin"> |
+    <BINTI:"binti"> |
+    <BINTE:"binte"> |
+    <DA:"da"> |
+    <DE:"de"> |
+    <DAL:"dal"> |
+    <DELA:"dela"> |
+    <DE_LA:"de la"> |
+    <DER:"der"> |
+    <DI:"di"> |
+    <ESTATE_OF:"estate of"> |
+    <IBN:"ibn"> |
+    <LA:"la"> |
+    <LE:"le"> |
+    <L_APOST:"l"("'")?> |
+    <MAC:"mac"> |
+    <MC:"mc"> |
+    <OH:"o'"> |
+    <SAN:"san"> |
+    <ST:"st"(".")?|"saint"> |
+    <STE:"ste"> |
+    <VAN_DER:"van der"> |
+    <VAN:"van"> |
+    <VAN_DEN:"van den"> |
+    <VEL:"vel"> |
+    <VON:"von"> |
+    // suffixes
+    <INC:"inc"(".")?> |
+    <LTD:"ltd"(".")?> |
+    <CO:"co"("rp")?(".")?> |
+    <TM:"tm"> |
+    <SECOND:("the ")?("2nd"|"second")> |
+    <THIRD:("the ")?("3rd"|"third")> |
+    <FOURTH:("the ")?("4th"|"fourth")> |
+    <LLB:"ll"(".")?"b"> |
+    <ESQ:"esquire"|"esq"(".")?> |
+    <JD:"jd"|"j.d."> |
+    <PHD:"phd"|"ph.d"> |
+    <BBA:"bba"|"b.b.a"> |
+    <MBA:"mba"|"m.b.a"> |
+    <BSC:"b"(".")?"sc"> |
+    <MD:"md"("d")?| "m.d"(".d")?> |
+    <DDS:"dds"> |
+    <DMD:"dmd"> |
+    <CP:"cp"| "c.p."> |
+    <SENIOR:"sr"(".")?|"senior"> |
+    <JUNIOR:"jr"(".")?|"junior"> |
+    <ROMAN_NUMERALS:"ii"|"iii"|"iv"|"v"|"vi"|"vii"|"viii">
+}
+
+TOKEN : {
+    <QUOTED_NICK_NAME: "\"" (~["\""])+ "\"" > |
+    <SINGLE_QUOTED_NICK_NAME: "'" (~["\""])+ "'" > |
+    <PAREN_NICK_NAME: "(" (~[")"])+ ")" > |
+// TODO : make sure i have all accent chars.
+//    <NAME : (["\u00e0"-"\u0466"]|
+//     ["a"-"z","-","'","."])+ >  |
+     <NAME_WITH_NUMBERS : (["\u00e0"-"\u0466"]|
+          ["a"-"z","0"-"9","-","'","."])+ >
+}
+
+void end() : {}
+{
+    (<EOF>) {names.peek().endParse();}
+}
+
+void _$$parse() : {}
+{
+    LOOKAHEAD(lastName() <COMMA>)
+        lastName() <COMMA> longName() end() |
+        longName() end()
+}
+
+
+void lastName() : {getName().setInverse(true);}
+{
+    LOOKAHEAD(namePrefix())
+        namePrefix() (nameRoot())? |
+        nameRoot()
+}
+
+
+void longName() : {}
+{
+    LOOKAHEAD(salutation())
+        (salutation()) ((name())+ ( relation())? (<COMMA>)? (title() (<COMMA>)?)*)?  |
+        (name())+ ( relation())? (<COMMA>)? (title() (<COMMA>)?)*
+}
+
+
+
+void restOfName() : {}
+{
+    (name())+ (relation())? ((<COMMA>)? (title())*)
+}
+
+void and() : {} {
+    (<AND>)  {
+        names.peek().endParse();
+        names.push(new Name());
+    }
+}
+
+void salutation() : {}
+{
+    (<ESTATE_OF>|<HON>|<MR>|<MRS>|<MISS>|<MS>|<SIR>|<MADAM>|<ATTY>|<DOCTOR>|<PROF>)
+        {getName().addSalutation(token.image);}
+}
+
+void relation() : {} {
+    (<SECOND>|<THIRD>|<FOURTH>|<SENIOR>|<JUNIOR>|<ROMAN_NUMERALS>)
+        {getName().addRelation(token.image);}
+}
+
+void title() : {}
+{
+    companyTitle() | personalTitle()
+}
+
+void companyTitle() : {}
+{
+    (<INC>|<CO>|<LTD>|<TM>) {getCompanyName().addTitle(token.image);}
+}
+void personalTitle() : {}
+{
+    (<LLB>|<DDS>|<DMD>|<ESQ>|<JD>|<BSC>|<PHD>|<BBA>|<MBA>|<MD>|<CP>){getName().addTitle(token.image);}
+}
+
+
+void name() : {}
+{
+    LOOKAHEAD(namePrefix())
+        namePrefix() (nameRoot())? |
+        nickName() |
+        nameRoot()
+}
+
+void nameRoot() : {}
+{
+    (<NAME_WITH_NUMBERS>) { getName().add(token.image); }
+}
+
+void namePrefix() : {}
+{
+    (<BAR>|<BEN>|<BIN>|<BINTI>|<BINTE>|<DA>|<DAL>|<DE>|<DELA>|<DE_LA>|<DER>|<DI>|<IBN>|<LA>|<L_APOST>|<LE>|<MAC>|<MC>|<OH>|<SAN>|<ST>|<STE>|<VAN_DER>|<VAN>|<VAN_DEN>|<VEL>|<VON>)
+        { getName().addNameButPossiblyPrefix(token.image, token.kind); }
+}
+
+
+void nickName() : {}
+{
+    (<SINGLE_QUOTED_NICK_NAME>|<QUOTED_NICK_NAME>|<PAREN_NICK_NAME>) { getName().addNickName(token.image); }
+}
+
+
+
+void companyName() : {}
+{
+    (<NAME_WITH_NUMBERS>) { getCompanyName().add(token.image); }
+}
+
+
+
+
+
