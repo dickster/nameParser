@@ -81,65 +81,61 @@ public interface NameParserConstants {
   /** RegularExpression Id. */
   int STE = 39;
   /** RegularExpression Id. */
-  int VAN_DER = 40;
+  int VAN = 40;
   /** RegularExpression Id. */
-  int VAN = 41;
+  int VEL = 41;
   /** RegularExpression Id. */
-  int VAN_DEN = 42;
+  int VON = 42;
   /** RegularExpression Id. */
-  int VEL = 43;
+  int INC = 43;
   /** RegularExpression Id. */
-  int VON = 44;
+  int LTD = 44;
   /** RegularExpression Id. */
-  int INC = 45;
+  int CO = 45;
   /** RegularExpression Id. */
-  int LTD = 46;
+  int TM = 46;
   /** RegularExpression Id. */
-  int CO = 47;
+  int SECOND = 47;
   /** RegularExpression Id. */
-  int TM = 48;
+  int THIRD = 48;
   /** RegularExpression Id. */
-  int SECOND = 49;
+  int FOURTH = 49;
   /** RegularExpression Id. */
-  int THIRD = 50;
+  int LLB = 50;
   /** RegularExpression Id. */
-  int FOURTH = 51;
+  int ESQ = 51;
   /** RegularExpression Id. */
-  int LLB = 52;
+  int JD = 52;
   /** RegularExpression Id. */
-  int ESQ = 53;
+  int PHD = 53;
   /** RegularExpression Id. */
-  int JD = 54;
+  int BBA = 54;
   /** RegularExpression Id. */
-  int PHD = 55;
+  int MBA = 55;
   /** RegularExpression Id. */
-  int BBA = 56;
+  int BSC = 56;
   /** RegularExpression Id. */
-  int MBA = 57;
+  int MD = 57;
   /** RegularExpression Id. */
-  int BSC = 58;
+  int DDS = 58;
   /** RegularExpression Id. */
-  int MD = 59;
+  int DMD = 59;
   /** RegularExpression Id. */
-  int DDS = 60;
+  int CP = 60;
   /** RegularExpression Id. */
-  int DMD = 61;
+  int SENIOR = 61;
   /** RegularExpression Id. */
-  int CP = 62;
+  int JUNIOR = 62;
   /** RegularExpression Id. */
-  int SENIOR = 63;
+  int ROMAN_NUMERALS = 63;
   /** RegularExpression Id. */
-  int JUNIOR = 64;
+  int QUOTED_NICK_NAME = 64;
   /** RegularExpression Id. */
-  int ROMAN_NUMERALS = 65;
+  int SINGLE_QUOTED_NICK_NAME = 65;
   /** RegularExpression Id. */
-  int QUOTED_NICK_NAME = 66;
+  int PAREN_NICK_NAME = 66;
   /** RegularExpression Id. */
-  int SINGLE_QUOTED_NICK_NAME = 67;
-  /** RegularExpression Id. */
-  int PAREN_NICK_NAME = 68;
-  /** RegularExpression Id. */
-  int NAME_WITH_NUMBERS = 69;
+  int NAME_WITH_NUMBERS = 67;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -186,9 +182,7 @@ public interface NameParserConstants {
     "\"san\"",
     "<ST>",
     "\"ste\"",
-    "\"van der\"",
-    "\"van\"",
-    "\"van den\"",
+    "<VAN>",
     "\"vel\"",
     "\"von\"",
     "<INC>",

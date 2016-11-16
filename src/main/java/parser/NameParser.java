@@ -405,14 +405,10 @@ getName().addName(token.image, token.kind);
     } else if (jj_2_83(4)) {
       jj_consume_token(STE);
     } else if (jj_2_84(4)) {
-      jj_consume_token(VAN_DER);
-    } else if (jj_2_85(4)) {
       jj_consume_token(VAN);
-    } else if (jj_2_86(4)) {
-      jj_consume_token(VAN_DEN);
-    } else if (jj_2_87(4)) {
+    } else if (jj_2_85(4)) {
       jj_consume_token(VEL);
-    } else if (jj_2_88(4)) {
+    } else if (jj_2_86(4)) {
       jj_consume_token(VON);
     } else {
       jj_consume_token(-1);
@@ -422,11 +418,11 @@ getName().addNameButPossiblyPrefix(token.image, token.kind);
   }
 
   final public void nickName() throws ParseException {
-    if (jj_2_89(4)) {
+    if (jj_2_87(4)) {
       jj_consume_token(SINGLE_QUOTED_NICK_NAME);
-    } else if (jj_2_90(4)) {
+    } else if (jj_2_88(4)) {
       jj_consume_token(QUOTED_NICK_NAME);
-    } else if (jj_2_91(4)) {
+    } else if (jj_2_89(4)) {
       jj_consume_token(PAREN_NICK_NAME);
     } else {
       jj_consume_token(-1);
@@ -1152,20 +1148,10 @@ getCompanyName().addName(token.image, token.kind);
     finally { jj_save(88, xla); }
   }
 
-  private boolean jj_2_90(int xla)
+  private boolean jj_3R_9()
  {
-    jj_la = xla; jj_lastpos = jj_scanpos = token;
-    try { return !jj_3_90(); }
-    catch(LookaheadSuccess ls) { return true; }
-    finally { jj_save(89, xla); }
-  }
-
-  private boolean jj_2_91(int xla)
- {
-    jj_la = xla; jj_lastpos = jj_scanpos = token;
-    try { return !jj_3_91(); }
-    catch(LookaheadSuccess ls) { return true; }
-    finally { jj_save(90, xla); }
+    if (jj_scan_token(0)) return true;
+    return false;
   }
 
   private boolean jj_3_80()
@@ -1228,7 +1214,7 @@ getCompanyName().addName(token.image, token.kind);
     return false;
   }
 
-  private boolean jj_3_91()
+  private boolean jj_3_89()
  {
     if (jj_scan_token(PAREN_NICK_NAME)) return true;
     return false;
@@ -1276,7 +1262,7 @@ getCompanyName().addName(token.image, token.kind);
     return false;
   }
 
-  private boolean jj_3_90()
+  private boolean jj_3_88()
  {
     if (jj_scan_token(QUOTED_NICK_NAME)) return true;
     return false;
@@ -1360,7 +1346,7 @@ getCompanyName().addName(token.image, token.kind);
     return false;
   }
 
-  private boolean jj_3_89()
+  private boolean jj_3_87()
  {
     if (jj_scan_token(SINGLE_QUOTED_NICK_NAME)) return true;
     return false;
@@ -1370,11 +1356,11 @@ getCompanyName().addName(token.image, token.kind);
  {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_3_89()) {
+    if (jj_3_87()) {
     jj_scanpos = xsp;
-    if (jj_3_90()) {
+    if (jj_3_88()) {
     jj_scanpos = xsp;
-    if (jj_3_91()) return true;
+    if (jj_3_89()) return true;
     }
     }
     return false;
@@ -1477,13 +1463,7 @@ getCompanyName().addName(token.image, token.kind);
     jj_scanpos = xsp;
     if (jj_3_85()) {
     jj_scanpos = xsp;
-    if (jj_3_86()) {
-    jj_scanpos = xsp;
-    if (jj_3_87()) {
-    jj_scanpos = xsp;
-    if (jj_3_88()) return true;
-    }
-    }
+    if (jj_3_86()) return true;
     }
     }
     }
@@ -1748,12 +1728,6 @@ getCompanyName().addName(token.image, token.kind);
     return false;
   }
 
-  private boolean jj_3_88()
- {
-    if (jj_scan_token(VON)) return true;
-    return false;
-  }
-
   private boolean jj_3_36()
  {
     if (jj_scan_token(THIRD)) return true;
@@ -1780,12 +1754,6 @@ getCompanyName().addName(token.image, token.kind);
   private boolean jj_3_41()
  {
     if (jj_3R_16()) return true;
-    return false;
-  }
-
-  private boolean jj_3_87()
- {
-    if (jj_scan_token(VEL)) return true;
     return false;
   }
 
@@ -1904,7 +1872,7 @@ getCompanyName().addName(token.image, token.kind);
 
   private boolean jj_3_86()
  {
-    if (jj_scan_token(VAN_DEN)) return true;
+    if (jj_scan_token(VON)) return true;
     return false;
   }
 
@@ -1923,12 +1891,6 @@ getCompanyName().addName(token.image, token.kind);
   private boolean jj_3_17()
  {
     if (jj_3R_15()) return true;
-    return false;
-  }
-
-  private boolean jj_3_85()
- {
-    if (jj_scan_token(VAN)) return true;
     return false;
   }
 
@@ -1954,6 +1916,12 @@ getCompanyName().addName(token.image, token.kind);
       xsp = jj_scanpos;
       if (jj_3_15()) { jj_scanpos = xsp; break; }
     }
+    return false;
+  }
+
+  private boolean jj_3_85()
+ {
+    if (jj_scan_token(VEL)) return true;
     return false;
   }
 
@@ -1985,7 +1953,7 @@ getCompanyName().addName(token.image, token.kind);
 
   private boolean jj_3_84()
  {
-    if (jj_scan_token(VAN_DER)) return true;
+    if (jj_scan_token(VAN)) return true;
     return false;
   }
 
@@ -2047,12 +2015,6 @@ getCompanyName().addName(token.image, token.kind);
     return false;
   }
 
-  private boolean jj_3R_9()
- {
-    if (jj_scan_token(0)) return true;
-    return false;
-  }
-
   /** Generated Token Manager. */
   public NameParserTokenManager token_source;
   SimpleCharStream jj_input_stream;
@@ -2082,7 +2044,7 @@ getCompanyName().addName(token.image, token.kind);
    private static void jj_la1_init_2() {
       jj_la1_2 = new int[] {};
    }
-  final private JJCalls[] jj_2_rtns = new JJCalls[91];
+  final private JJCalls[] jj_2_rtns = new JJCalls[89];
   private boolean jj_rescan = false;
   private int jj_gc = 0;
 
@@ -2262,7 +2224,7 @@ getCompanyName().addName(token.image, token.kind);
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[70];
+    boolean[] la1tokens = new boolean[68];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -2282,7 +2244,7 @@ getCompanyName().addName(token.image, token.kind);
         }
       }
     }
-    for (int i = 0; i < 70; i++) {
+    for (int i = 0; i < 68; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
@@ -2309,7 +2271,7 @@ getCompanyName().addName(token.image, token.kind);
 
   private void jj_rescan_token() {
     jj_rescan = true;
-    for (int i = 0; i < 91; i++) {
+    for (int i = 0; i < 89; i++) {
     try {
       JJCalls p = jj_2_rtns[i];
       do {
@@ -2405,8 +2367,6 @@ getCompanyName().addName(token.image, token.kind);
             case 86: jj_3_87(); break;
             case 87: jj_3_88(); break;
             case 88: jj_3_89(); break;
-            case 89: jj_3_90(); break;
-            case 90: jj_3_91(); break;
           }
         }
         p = p.next;

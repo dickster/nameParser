@@ -141,9 +141,7 @@ TOKEN:
     <SAN:"san"> |
     <ST:"st"(".")?|"saint"> |
     <STE:"ste"> |
-    <VAN_DER:"van der"> |
-    <VAN:"van"> |
-    <VAN_DEN:"van den"> |
+    <VAN:"van" (" ")?("der"|"den")?> |
     <VEL:"vel"> |
     <VON:"von"> |
     // suffixes
@@ -258,7 +256,7 @@ void nameRoot() : {}
 
 void namePrefix() : {}
 {
-    (<BAR>|<BEN>|<BIN>|<BINTI>|<BINTE>|<DA>|<DAL>|<DE>|<DELA>|<DE_LA>|<DER>|<DI>|<IBN>|<LA>|<L_APOST>|<LE>|<MAC>|<MC>|<OH>|<SAN>|<ST>|<STE>|<VAN_DER>|<VAN>|<VAN_DEN>|<VEL>|<VON>)
+    (<BAR>|<BEN>|<BIN>|<BINTI>|<BINTE>|<DA>|<DAL>|<DE>|<DELA>|<DE_LA>|<DER>|<DI>|<IBN>|<LA>|<L_APOST>|<LE>|<MAC>|<MC>|<OH>|<SAN>|<ST>|<STE>|<VAN>|<VEL>|<VON>)
         { getName().addNameButPossiblyPrefix(token.image, token.kind); }
 }
 
