@@ -29,6 +29,24 @@ public class NameParser {
 
 // TODO : refactor this splitting crap code.   use another .jj file?
     public NameResult parseNames(String text) {
+        List<String> split = split(text);
+        names = new NameResult();
+        for (String name:split) {
+            try {
+               System.out.println("parsing : " + name);
+               names.push(new Name());
+               parseName(name);
+            } catch (ParseException e) {
+                e.printStackTrace();
+                return new NameResult().error(text);
+            }
+
+        }
+        names.collate();
+        return names;
+    }
+
+    private List<String> split(String text) {
         List<String> result = Lists.newArrayList(text);
         result = split(result,"and");
         result = split(result, "[+]");
@@ -36,21 +54,7 @@ public class NameParser {
         result = split(result,"'n");
         result = split(result,";",false);
         if (result.size()>1) System.out.println("breaking down names " + text + " --> " + result);
-        NameResult nameResult = new NameResult();
-        init();
-        for (String name:result) {
-            try {
-               System.out.println("parsing : " + name);
-                nameResult = parseName(name);
-                names.push(new Name());
-            } catch (ParseException e) {
-                e.printStackTrace();
-                return new NameResult().error(text);
-            }
-
-        }
-        nameResult.collate();
-        return nameResult;
+        return result;
     }
 
     private List<String> split(List<String> names, String regex, boolean whitespace) {
@@ -67,16 +71,14 @@ public class NameParser {
     }
 
 
-    private NameResult parseName(String text) throws ParseException, TokenMgrError {
+    private void parseName(String text) throws ParseException, TokenMgrError {
         text = text.trim();
         ReInit(new StringReader(text));
         _$$parse();
-
-        return names.collate();
     }
 
     private void init() {
-        names = new NameResult();
+
         names.push(new Name());
     }
 
@@ -103,7 +105,6 @@ SKIP :
 TOKEN:
 {
     <COMMA:","> |
-    <AND:"+"|"&"|"'n"|"and"> |
     // prefixes......
     <HON:"hon"(".")?("orable")?> |
     <JUDGE:"judge"> |
@@ -215,12 +216,6 @@ void restOfName() : {}
     (name())+ (relation())? ((<COMMA>)? (title())*)
 }
 
-void and() : {} {
-    (<AND>)  {
-        names.peek().endParse();
-        names.push(new Name());
-    }
-}
 
 void salutation() : {}
 {

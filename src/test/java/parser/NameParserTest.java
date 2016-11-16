@@ -42,7 +42,7 @@ public class NameParserTest  {
             "Peter O Malley",    // TODO : need to set ambiguity flag for this case.
             "Peter O Malley,  B.Sc Phd",
             "Sir O Sis, LLB",
-            "Hon Judge Bob Baker",
+            "Hon Bob Baker",
             "Smith, John Bob Jr.",
             "judge peter O. Malley",  // not sure how to treat "O".
             "Peter O'Malley",

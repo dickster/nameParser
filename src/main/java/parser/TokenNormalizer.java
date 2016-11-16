@@ -7,9 +7,7 @@ import java.util.Map;
 
 public class TokenNormalizer {
 
-
     private static Map<Integer, String> normalizedText = ImmutableMap.<Integer, String>builder().
-            put(NameParserConstants.AND, "and").
             put(NameParserConstants.HON, "Honourable").
             put(NameParserConstants.MR, "Mr.").
             put(NameParserConstants.MRS, "Mrs.").
@@ -48,7 +46,7 @@ public class TokenNormalizer {
         return NameParserConstants.tokenImage[kind];
     }
 
-    public String normalize(String value, int kind, Name.TokenType type) {
+    public String normalize(String value, int kind, NameTokenType type) {
         String result = normalizedText.get(kind);
         if (result==null) {
             return value;

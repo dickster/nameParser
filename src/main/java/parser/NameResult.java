@@ -33,7 +33,7 @@ public class NameResult extends Stack<Name> {
     public boolean mayBeAmbiguous() {
         Iterable<Name> ambiguous = Iterables.filter(this, new Predicate<Name>() {
             @Override public boolean apply(Name name) {
-                return name.isAmbiguous();
+            return name.isAmbiguous();
             }
         });
         return ambiguous.iterator().hasNext();

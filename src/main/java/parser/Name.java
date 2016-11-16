@@ -1,9 +1,7 @@
 package parser;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -19,52 +17,18 @@ public class Name implements Serializable {
     //  if any names have a number and personalTitles, suffixes, relations exist then log ambiguity
     //   Eg. 7-Up Jr,     Mr 8-Ball
 
-    List<Token> salutation = Lists.newArrayList();
-    List<Token> first = Lists.newArrayList();
-    List<Token> middle = Lists.newArrayList();
-    List<Token> last = Lists.newArrayList();
-    List<Token> relations = Lists.newArrayList();  //junior, senior, III etc...
-    List<Token> titles = Lists.newArrayList();     //PHd MD B.Sc etc...
-    List<Token> names = Lists.newArrayList();
-    List<Token> nickNames = Lists.newArrayList();
-    List<Token> inc = Lists.newArrayList();
+    List<NameToken> salutation = Lists.newArrayList();
+    List<NameToken> first = Lists.newArrayList();
+    List<NameToken> middle = Lists.newArrayList();
+    List<NameToken> last = Lists.newArrayList();
+    List<NameToken> relations = Lists.newArrayList();  //junior, senior, III etc...
+    List<NameToken> titles = Lists.newArrayList();     //PHd MD B.Sc etc...
+    List<NameToken> names = Lists.newArrayList();
+    List<NameToken> nickNames = Lists.newArrayList();
+    List<NameToken> inc = Lists.newArrayList();
     boolean inverse = false;
     boolean isCompany = false;
-    boolean prefixAdded = false;
 
-    private final TokenNormalizer normalizer = new TokenNormalizer();
-    private String namePrefix;
-
-
-
-    public enum TokenType {
-        NAME, PREFIX,SALUTATION, PERSONAL_TITLE, COMPANY_TITLE, TITLE, RELATION, NICK_NAME, INC
-    }
-
-    public class Token {
-        int kind;
-        String value;    // e.g. "the second"
-        String tokenText;     // e.g. <SECOND>
-        String normalizedText; // e.g. II
-        boolean isInitial;
-        TokenType type;
-        Token(String value, int kind, TokenType type) {
-            this.value = value;
-            this.tokenText = normalizer.tokenText(kind);
-            this.normalizedText = normalizer.normalize(value, kind, type);
-            this.type = type;
-        }
-
-        @Override
-        public String toString() {
-            return normalizedText;
-        }
-    }
-
-    public Name(String john, String doe) {
-        addFirst(john);
-        addLast(doe);
-    }
 
     public Name() {
     }
@@ -83,11 +47,15 @@ public class Name implements Serializable {
         return this;
     }
 
-    private Token newNameToken(String name) {
+    private NameToken newNameToken(String name) {
         if (hasNumberPattern.matcher(name).find()) {
             isCompany = true;
         }
-        return new Token(name, NameParserConstants.NAME_WITH_NUMBERS, TokenType.NAME);
+        return createToken(name, NameParserConstants.NAME_WITH_NUMBERS, NameTokenType.NAME);
+    }
+
+    protected NameToken createToken(String name, int kind, NameTokenType type) {
+        return new NameToken(name, kind, type);
     }
 
     public Name withMiddleName(String name) {
@@ -119,54 +87,39 @@ public class Name implements Serializable {
         return asString(salutation);
     }
 
-    public List<Token>  getFirstTokens() {
+    public List<NameToken>  getFirstTokens() {
         return first;
     }
 
-    public List<Token>  getMiddleTokens() {
+    public List<NameToken>  getMiddleTokens() {
         return middle;
     }
 
-    public List<Token>  getLastTokens() {
+    public List<NameToken>  getLastTokens() {
         return last;
     }
 
-    public List<Token>  getTitleTokens() {
+    public List<NameToken>  getTitleTokens() {
         return titles;
     }
 
-    public List<Token> getSalutationTokens() {
+    public List<NameToken> getSalutationTokens() {
         return salutation;
     }
 
-    private String asString(List<Token> name) {
+    private String asString(List<NameToken> name) {
         String text = Joiner.on(" ").skipNulls().join(name);
         return (name.size()>1) ?
                 "\"" + text + "\"" :
                 text;
     }
 
-    private boolean isAmbiguous(List<Token> name) {
+    private boolean isAmbiguous(List<NameToken> name) {
         return name!=null && name.size()>1;
     }
 
     public Name addSalutation(String salutation, int kind) {
-        this.salutation.add(new Token(salutation, kind, TokenType.SALUTATION));
-        return this;
-    }
-
-    public Name addFirst(String name) {
-        first.add(newNameToken(unquoted(name)));
-        return this;
-    }
-
-    public Name addMiddle(String name) {
-        middle.add(newNameToken(unquoted(name)));
-        return this;
-    }
-
-    public Name addLast(String name) {
-        last.add(newNameToken(unquoted(name)));
+        this.salutation.add(createToken(salutation, kind, NameTokenType.SALUTATION));
         return this;
     }
 
@@ -174,16 +127,16 @@ public class Name implements Serializable {
         return convertTokenToString(relations);
     }
 
-    private List<String> convertTokenToString(List<Token> tokens) {
+    private List<String> convertTokenToString(List<NameToken> tokens) {
        List<String> result = Lists.newArrayList();
-       for (Token token:tokens) {
+       for (NameToken token:tokens) {
            result.add(token.normalizedText);
        }
        return result;
     }
 
     public void addRelation(String relation, int kind) {
-        this.relations.add(new Token(relation, kind, TokenType.RELATION));
+        this.relations.add(createToken(relation, kind, NameTokenType.RELATION));
     }
 
     public Name merge(Name other) {
@@ -194,8 +147,14 @@ public class Name implements Serializable {
         if (first.isEmpty()) {
             first.addAll(other.first);
         }
-        if (getLast().isEmpty()) {
+        if (other.first.isEmpty()) {
+            other.first.addAll(first);
+        }
+        if (last.isEmpty()) {
             last.addAll(other.last);
+        }
+        if (other.last.isEmpty()) {
+            other.last.addAll(last);
         }
         return this;
     }
@@ -205,6 +164,7 @@ public class Name implements Serializable {
         this.isCompany = true;
         return this;
     }
+
     public boolean isAmbiguous() {
         // note the definition of ambiguous is itself ambiguous.
         // if you have two last names then it *could* be ambiguous.
@@ -219,7 +179,7 @@ public class Name implements Serializable {
 
     public void endParse() {
         if (inverse) {
-            Token lastName = names.get(0);
+            NameToken lastName = names.get(0);
             names.remove(0);
             names.add(lastName);
         }
@@ -236,12 +196,8 @@ public class Name implements Serializable {
             return;
         }
         if (names.size()==3) {
-            if (isProbablyMiddleName(names.get(1))) {
-                middle.add(names.get(1));
-                last.addAll(names.subList(2, names.size()));
-            } else {
-                last.addAll(names.subList(1, names.size()));
-            }
+            middle.add(names.get(1));
+            last.addAll(names.subList(2, names.size()));
         } else {
             System.out.println("THIS NAME IS AMBIGUOUS? assuming a middle name of " + names.get(1));
             middle.add(names.get(1));
@@ -249,7 +205,7 @@ public class Name implements Serializable {
         }
     }
 
-    public Token addName(String name, int kind) {
+    public NameToken addName(String name, int kind) {
 
         // TODO : add ambiguity check. if name = "O" could be prefix?
 
@@ -258,33 +214,19 @@ public class Name implements Serializable {
 
         String namePrefix = getNamePrefix();
         if (namePrefix != null) {
-            Token token = newNameToken(namePrefix + " " + name);
+            NameToken token = newNameToken(namePrefix + " " + name);
             names.set(names.size() - 1, token);
             return token;
         } else {
-            Token token = newNameToken(name);
+            NameToken token = newNameToken(name);
             names.add(token);
             return token;
         }
 
     }
 
-    public boolean isProbablyMiddleName(Token token) {
-        // this business logic should be refactored out into a spring bean service.
-        // if nameService.isProbablyNotAMiddleName(name)  name.addLast(name); else name.addMiddle(name);
-        String name = token.normalizedText;
-        Preconditions.checkArgument(StringUtils.isNotBlank(name));
-        if (name.length()==1||(name.length()==2&&name.endsWith("."))) {
-            return true;
-        }
-        // lots more to put here from different cultures.
-        // TODO :
-        List<String> notMiddleNames = Lists.newArrayList("van", "le", "la", "di", "mac", "bin", "binti", "de", "o'", "der", "den", "l'");
-        return !notMiddleNames.contains(name.toLowerCase());
-    }
-
     public void addNameButPossiblyPrefix(String prefix, int kind) {
-        addName(prefix, NameParserConstants.NAME_WITH_NUMBERS).type=TokenType.PREFIX;
+        addName(prefix, NameParserConstants.NAME_WITH_NUMBERS).type=NameTokenType.PREFIX;
        // System.out.println("prefix : " + kind + " --> " + NameParserConstants.tokenImage[kind]);
     }
 
@@ -293,17 +235,17 @@ public class Name implements Serializable {
     }
 
     public void addTitle(String title, int kind) {
-        this.titles.add(new Token(title,kind,TokenType.TITLE));
+        this.titles.add(createToken(title,kind,NameTokenType.TITLE));
     }
 
     public void setInverse(boolean inverse) {
         this.inverse = inverse;
     }
 
-
     @Override
     public String toString() {
-        return toDebugString() + "  aka " + toNormalizedString();
+        return toDebugString();
+       // return toNormalizedString();
     }
 
     public String toDebugString() {
@@ -323,15 +265,6 @@ public class Name implements Serializable {
         return isCompany;
     }
 
-    public int compareTo(Name name) {
-       // TODO compare first & last names only.
-       // if anything else different then log it and return a different match level.
-       // return DEFINITE_MATCH|PROBABLE_MATCH|WEAK_MATCH|SIMILAR
-
-        // how to deal with multiple names.  iterate and compare?
-        return 0;
-    }
-
     public String toNormalizedString() {
             StringBuilder builder = new StringBuilder();
             if (!salutation.isEmpty()) builder.append(toNormalizedString(salutation));
@@ -346,9 +279,9 @@ public class Name implements Serializable {
 
     }
 
-    private String toNormalizedString(List<Token> tokens) {
+    private String toNormalizedString(List<NameToken> tokens) {
         StringBuilder builder = new StringBuilder();
-        for (Token token:tokens) {
+        for (NameToken token:tokens) {
             builder.append(token.normalizedText);
             builder.append(" ");
         }
@@ -357,8 +290,8 @@ public class Name implements Serializable {
 
     public @Nullable String getNamePrefix() {
         if ( names.size()==0) return null;
-        Token previousName = names.get(names.size() - 1);
-        return previousName.type==TokenType.PREFIX ? previousName.value : null;
+        NameToken previousName = names.get(names.size() - 1);
+        return previousName.type==NameTokenType.PREFIX ? previousName.value : null;
     }
 
 

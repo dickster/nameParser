@@ -13,9 +13,9 @@ public interface NameParserConstants {
   /** RegularExpression Id. */
   int COMMA = 5;
   /** RegularExpression Id. */
-  int AND = 6;
+  int HON = 6;
   /** RegularExpression Id. */
-  int HON = 7;
+  int JUDGE = 7;
   /** RegularExpression Id. */
   int MR = 8;
   /** RegularExpression Id. */
@@ -152,8 +152,8 @@ public interface NameParserConstants {
     "\"\\r\"",
     "\"\\n\"",
     "\",\"",
-    "<AND>",
     "<HON>",
+    "\"judge\"",
     "<MR>",
     "<MRS>",
     "<MISS>",
