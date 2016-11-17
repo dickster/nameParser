@@ -25,7 +25,6 @@ public class Name implements Serializable {
     List<NameToken> titles = Lists.newArrayList();     //PHd MD B.Sc etc...
     List<NameToken> names = Lists.newArrayList();
     List<NameToken> nickNames = Lists.newArrayList();
-    List<NameToken> inc = Lists.newArrayList();
     boolean inverse = false;
     boolean isCompany = false;
 
@@ -109,9 +108,7 @@ public class Name implements Serializable {
 
     private String asString(List<NameToken> name) {
         String text = Joiner.on(" ").skipNulls().join(name);
-        return (name.size()>1) ?
-                "\"" + text + "\"" :
-                text;
+        return text;
     }
 
     private boolean isAmbiguous(List<NameToken> name) {
@@ -123,17 +120,21 @@ public class Name implements Serializable {
         return this;
     }
 
-    public List<String> getRelations() {
-        return convertTokenToString(relations);
+    public String getRelations() {
+        return asString(relations);
     }
 
-    private List<String> convertTokenToString(List<NameToken> tokens) {
-       List<String> result = Lists.newArrayList();
-       for (NameToken token:tokens) {
-           result.add(token.normalizedText);
-       }
-       return result;
+    public List<NameToken> getRelationTokens() {
+        return relations;
     }
+//
+//    private List<String> convertTokenToString(List<NameToken> tokens) {
+//       List<String> result = Lists.newArrayList();
+//       for (NameToken token:tokens) {
+//           result.add(token.normalizedText);
+//       }
+//       return result;
+//    }
 
     public void addRelation(String relation, int kind) {
         this.relations.add(createToken(relation, kind, NameTokenType.RELATION));
@@ -257,7 +258,6 @@ public class Name implements Serializable {
         if (!last.isEmpty()) builder.append("  last :" + last);
         if (!relations.isEmpty()) builder.append("  relations :" + relations);
         if (!titles.isEmpty()) builder.append("  titles:" + titles);
-        if (!inc.isEmpty()) builder.append(" inc: " + inc);
         return builder.toString();
     }
 
@@ -274,7 +274,6 @@ public class Name implements Serializable {
             if (!last.isEmpty()) builder.append(toNormalizedString( last));
             if (!relations.isEmpty()) builder.append(toNormalizedString( relations));
             if (!titles.isEmpty()) builder.append(toNormalizedString(titles));
-            if (!inc.isEmpty()) builder.append(toNormalizedString(inc));
             return builder.toString().trim();
 
     }

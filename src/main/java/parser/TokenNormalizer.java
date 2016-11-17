@@ -1,8 +1,8 @@
 package parser;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
+import java.util.List;
 import java.util.Map;
 
 public class TokenNormalizer {
@@ -41,23 +41,38 @@ public class TokenNormalizer {
     }
 
 
-    public String tokenText(int kind) {
-        Preconditions.checkState(kind>=0 && kind<NameParserConstants.tokenImage.length);
-        return NameParserConstants.tokenImage[kind];
+    public Name normalize(Name name) {
+        normalize(name.getFirstTokens());
+        normalize(name.getLastTokens());
+        normalize(name.getMiddleTokens());
+        normalize(name.getTitleTokens());
+        normalize(name.getSalutationTokens());
+        normalize(name.getRelationTokens());
+        return name;
     }
 
-    public String normalize(String value, int kind, NameTokenType type) {
-        String result = normalizedText.get(kind);
+
+    private void normalize(List<NameToken> tokens) {
+        for (NameToken token:tokens) {
+            normalize(token);
+        }
+    }
+
+
+    public String normalize(NameToken token) {
+        String result = normalizedText.get(token.kind);
         if (result==null) {
-            return value;
+            return token.value;
+        }
+        //arbitrarily decide that initials always have dot.
+        // George W Bush  -->  George W. Bush
+        if (token.isInitial && token.value.length()==1) {
+            token.value = token.value+".";
         }
         if (result.contains("%s")) {
-            return String.format(result, value);
+            return String.format(result, token.value);
         }
 
-        // TODO
-        // if one letter optionally followed by period mark as initial so it
-        //  can be compared appropriately.
         return result;
     }
 }
