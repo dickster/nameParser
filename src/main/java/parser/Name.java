@@ -90,6 +90,7 @@ public class Name implements Serializable {
         return first;
     }
 
+    // TODO : change this so there is only one?  can you have multiple middle names?
     public List<NameToken>  getMiddleTokens() {
         return middle;
     }
@@ -102,6 +103,7 @@ public class Name implements Serializable {
         return titles;
     }
 
+    // TODO : change this so there is only one token.
     public List<NameToken> getSalutationTokens() {
         return salutation;
     }
@@ -124,6 +126,7 @@ public class Name implements Serializable {
         return asString(relations);
     }
 
+    // TODO : change this so  there is only one.  for example you can't have John Doe II, IV
     public List<NameToken> getRelationTokens() {
         return relations;
     }

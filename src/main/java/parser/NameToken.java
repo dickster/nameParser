@@ -2,6 +2,7 @@ package parser;
 
 import com.google.common.base.Preconditions;
 
+// TODO : extend this class so there is salutationToken, titleToken, relationToken
 public class NameToken  {
 
     int kind;

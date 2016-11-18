@@ -1,26 +1,20 @@
 package parser;
 
 
+import com.google.common.base.Preconditions;
+
 import java.util.List;
 
 // i didn't call this NameComparator  because i don't want it to be confused with
 // java Comparator because this does NOT return the same int  -x : 0 : +x values.
 public class NameComparer {
 
+    enum Gender {
+        Male, Female, Neutral;
 
-    class FailedMatchException extends Exception {
-        private final NameMatch match;
-
-        FailedMatchException(NameMatch match, String message) {
-            super(message);
-            this.match = match;
-        }
-        FailedMatchException(NameMatch match) {
-            this(match, "match exception : setting match level to " + match);
-        }
-
-        public NameMatch getMatch() {
-            return match;
+        public boolean isDifferent(Gender g) {
+            return (this==Neutral || g==Neutral) ? false :
+                    this.equals(g);
         }
     }
 
@@ -144,11 +138,53 @@ public class NameComparer {
 
     private int compareSalutation(Name a, Name b) {
 
-        // TODO : check for gender.  Ms & Mrs are +1.
-        // complete match is +2.
+        // TODO : check for gender.  Ms & Mrs are +2.
+        // complete match is +3.
+        // no match, but because one is ommitted = +1   e.g. Mr John Doe ?=  John Doe
         // Mr <>  Mrs/Ms/Miss are -4;
         // other differences are -1.   Dr Joe & Prof Joe : -1
-        return a.getSalutation().equalsIgnoreCase(b.getSalutation()) ? 1 : 0;
+        if (a.getSalutation().equalsIgnoreCase(b.getSalutation())) {  // complete match.
+            return 3;
+        }
+        if (a.getSalutationTokens().isEmpty() || b.getSalutationTokens().isEmpty()) {
+            return 1;                       // Jane Doe ?  Ms Jane Doe
+        }
+        if (isSameGender(a,b)) {            // Mrs Jane Doe  ?  Ms Jane Doe
+            return 2;
+        }
+        if (isDifferentGender(a,b)) {      // Mrs John Doe ? Mr John Doe
+            return -4;
+        }
+        // assume neutral differences.  Prof John Doe ?  Mr John Doe
+        return -1;
+    }
+
+    private boolean isSameGender(Name a, Name b) {
+        Preconditions.checkState(a.getSalutationTokens().size()==1 && b.getSalutationTokens().size()==1, "assumes you only have one of Mr/Mrs/Ms/Dr etc..");
+        return getGender(a)==getGender(b);
+    }
+
+    private boolean isDifferentGender(Name a, Name b) {
+        Preconditions.checkState(a.getSalutationTokens().size()==1 && b.getSalutationTokens().size()==1, "assumes you only have one of Mr/Mrs/Ms/Dr etc..");
+        Gender aGender = getGender(a);
+        Gender bGender = getGender(b);
+        return aGender.isDifferent(bGender);
+    }
+
+    private Gender getGender(Name name) {
+        NameToken salutation = name.getSalutationTokens().get(0);
+
+        switch (salutation.kind) {
+            case NameParserConstants.MR:
+                return Gender.Male;
+            case NameParserConstants.MS:
+            case NameParserConstants.MRS:
+            case NameParserConstants.MISS:
+            case NameParserConstants.MADAM:
+                return Gender.Female;
+            default:
+                return Gender.Neutral;   // for gender not specific stuff (Dr. Hon etc..) return null.
+        }
     }
 
 
