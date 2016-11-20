@@ -115,7 +115,7 @@ public class NameComparer {
         return compareTokenList(a.getTitleTokens(), b.getTitleTokens(), 0, -4);
     }
 
-    private int compareTokenList(List<NameToken> a, List<NameToken> b, int match, int nomatch) {
+    private <T extends Token> int compareTokenList(List<T> a, List<T> b, int match, int nomatch) {
         int partialMatch = (nomatch + match) /2;
         if (a.isEmpty() ||  b.isEmpty()) {
             return 0;
@@ -128,8 +128,8 @@ public class NameComparer {
         // compare shorter list .
         // eg. john doe Phd Md   john Doe md
         // just try to match the Md.  if phd doesn't match that's not as serious as Md not matching.
-        List<NameToken> source = a.size()<b.size() ? a : b;
-        List<NameToken> otherTitleList = source==a ? b : a;
+        List<T> source = a.size()<b.size() ? a : b;
+        List<T> otherTitleList = source==a ? b : a;
 
 
         for (int i = 0;i < source.size(); i++ ) {
@@ -143,8 +143,8 @@ public class NameComparer {
         return nomatch;
     }
 
-    private boolean compareInList(NameToken token, List<NameToken> tokens) {
-        for (NameToken t:tokens) {
+    private <T extends Token> boolean compareInList(T token, List<T> tokens) {
+        for (Token t:tokens) {
             if (token.normalizedText.equals(t.normalizedText)) {
                 return true;
             }
@@ -193,7 +193,7 @@ public class NameComparer {
     }
 
     private Gender getGender(Name name) {
-        NameToken salutation = name.getSalutationTokens().get(0);
+        Token salutation = name.getSalutationTokens().get(0);
 
         switch (salutation.kind) {
             case NameParserConstants.MR:

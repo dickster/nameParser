@@ -53,27 +53,29 @@ public class TokenNormalizer {
     }
 
 
-    private void normalize(List<NameToken> tokens) {
-        for (NameToken token:tokens) {
+    private <T extends Token> void normalize(List<T> tokens) {
+        for (Token token:tokens) {
             token.normalizedText = normalize(token);
         }
     }
 
 
-    public String normalize(NameToken token) {
+    public String normalize(Token token) {
         String result = normalizedText.get(token.kind);
         if (result==null) {
             return token.value;
         }
-        //arbitrarily decide that initials always end in dot.
-        // George W Bush  -->  George W. Bush
-        if (token.isInitial()) {
-            token.value = token.initial+".";
-        }
         if (result.contains("%s")) {
             return String.format(result, token.value);
         }
-
+        if (token instanceof NameToken) {
+            NameToken nt = (NameToken)token;
+            //arbitrarily decide that initials always end in dot.
+            // George W Bush  -->  George W. Bush
+            if (nt.isInitial()) {
+                nt.value = nt.initial+".";
+            }
+        }
         return result;
     }
 }
