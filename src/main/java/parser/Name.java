@@ -1,6 +1,7 @@
 package parser;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import parser.jj.NameParserConstants;
 
@@ -15,14 +16,14 @@ public class Name implements Serializable {
 
     // TODO : convert strings to tokens.  (kind, string, typeEnum:isPrefix|isCompany|isPerson???)
     // add normalization that will deduce if it's a company.   John's   (a non'last name has apostrophe S?)
-    //  if any names have a number and personalTitles, suffixes, relations exist then log ambiguity
+    //  if any names have a number and personalTitles, suffixes, relation exist then log ambiguity
     //   Eg. 7-Up Jr,     Mr 8-Ball
 
-    List<SalutationToken> salutation = Lists.newArrayList();
+    SalutationToken salutation= new SalutationToken();
     List<NameToken> first = Lists.newArrayList();
-    List<NameToken> middle = Lists.newArrayList();
+    NameToken middle = new NameToken();
     List<NameToken> last = Lists.newArrayList();
-    List<RelationToken> relations = Lists.newArrayList();  //junior, senior, III etc...
+    RelationToken relation= new RelationToken();  //junior, senior, III etc...
     List<TitleToken> titles = Lists.newArrayList();     //PHd MD B.Sc etc...
     List<NameToken> names = Lists.newArrayList();
     List<Token> nickNames = Lists.newArrayList();
@@ -33,10 +34,6 @@ public class Name implements Serializable {
     public Name() {
     }
 
-    private String getRelation() {
-        return relations.toString();
-    }
-
     private Token newNameToken(String name) {
         if (hasNumberPattern.matcher(name).find()) {
             isCompany = true;
@@ -45,23 +42,23 @@ public class Name implements Serializable {
     }
 
     public String getFirst() {
-        return asString(first);
+        return listToString(first);
     }
 
     public String getMiddle() {
-        return asString(middle);
+        return middle.toString();
     }
 
     public String getLast() {
-        return asString(last);
+        return listToString(last);
     }
 
     public String getTitles() {
-        return asString(titles);
+        return listToString(titles);
     }
 
     public String getSalutation() {
-        return asString(salutation);
+        return salutation.toString();
     }
 
     public List<NameToken>  getFirstTokens() {
@@ -69,24 +66,24 @@ public class Name implements Serializable {
     }
 
     // TODO : change this so there is only one?  can you have multiple middle names?
-    public List<NameToken>  getMiddleTokens() {
+    public NameToken getMiddleToken() {
         return middle;
     }
 
-    public List<NameToken>  getLastTokens() {
+    public List<NameToken> getLastTokens() {
         return last;
     }
 
-    public List<TitleToken>  getTitleTokens() {
+    public List<TitleToken> getTitleTokens() {
         return titles;
     }
 
     // TODO : change this so there is only one token.
-    public List<SalutationToken> getSalutationTokens() {
+    public SalutationToken getSalutationToken() {
         return salutation;
     }
 
-    private String asString(List<? extends Token> name) {
+    private String listToString(List<? extends Token> name) {
         String text = Joiner.on(" ").skipNulls().join(name);
         return text;
     }
@@ -96,17 +93,17 @@ public class Name implements Serializable {
     }
 
     public Name addSalutation(String salutation, int kind) {
-        this.salutation.add(new SalutationToken(salutation, kind));
+        Preconditions.checkState(this.salutation.isEmpty(),"can only add ONE salutation.");
+        this.salutation = new SalutationToken(salutation, kind);
         return this;
     }
 
-    public String getRelations() {
-        return asString(relations);
+    public String getRelation() {
+        return relation.toString();
     }
 
-    // TODO : change this so  there is only one.  for example you can't have John Doe II, IV
-    public List<RelationToken> getRelationTokens() {
-        return relations;
+    public RelationToken getRelationToken() {
+        return relation;
     }
 //
 //    private List<String> convertTokenToString(List<NameToken> tokens) {
@@ -118,7 +115,8 @@ public class Name implements Serializable {
 //    }
 
     public void addRelation(String relation, int kind) {
-        this.relations.add(new RelationToken(relation, kind));
+        Preconditions.checkState(this.relation.isEmpty(), "can only add ONE relation.");
+        this.relation = new RelationToken(relation, kind);
     }
 
     public Name merge(Name other) {
@@ -154,14 +152,19 @@ public class Name implements Serializable {
         // this will most likely be parsed as john/steven/dick peterson when it could be interpreted as
         //  john/steven dick/peterson.
 
-        if (isCompany() && !(getSalutationTokens().isEmpty() && getRelationTokens().isEmpty() && getTitleTokens().isEmpty())) {
+
+        // TODO : check for middle name/prefix ambiguity.  peter o brien.   could mean o'brien or peter o. brien.
+
+        if (isCompany() && !(getSalutationToken()==null && getRelationToken()==null && getTitleTokens().isEmpty())) {
             return true;  // e.g.   7-up MD, Phd   or  Dr. Chrysler Fiat the third, Phd
         }
 
         // also add checks for company and person ambiguity.   Mr. Joe Fresh Inc.
         //   Mrs. 8977  etc...
 
-        return isAmbiguous(first) || isAmbiguous(middle) || isAmbiguous(last);
+        return isAmbiguous(first) ||   /* first should never be ambiguous */
+                isAmbiguous(last);    // last will be ambiguous if multiple names.
+        // e.g. maria sanchez lopez castillo  (last name = lopez castillo)
     }
 
     public void endParse() {
@@ -183,38 +186,43 @@ public class Name implements Serializable {
             return;
         }
         if (names.size()==3) {
-            middle.add(names.get(1));
+            middle = names.get(1);
             last.addAll(names.subList(2, names.size()));
         } else {
             System.out.println("THIS NAME IS AMBIGUOUS? assuming a middle name of " + names.get(1));
-            middle.add(names.get(1));
+            middle = names.get(1);
             last.addAll(names.subList(2, names.size()));
         }
     }
 
-    public Token addName(String name, int kind) {
+    public NameToken addName(String name, int kind, TokenType type) {
 
-        // TODO : add ambiguity check. if name = "O" could be prefix?
-
-        // e.g. if "Van Den" is prefix and name = "Hooegarden" is passed,
+       // e.g. if "Van Den" is prefix and name = "Hooegarden" is passed,
         //  then concatenate them into single "Van Den Hooegarden" last name.
-
+        NameToken token;
         String namePrefix = getNamePrefix();
         if (namePrefix != null) {
-            NameToken token = new NameToken(namePrefix + " " + name);
+            token = new NameToken(namePrefix + " " + name);
             names.set(names.size() - 1, token);
-            return token;
+
         } else {
-            NameToken token = new NameToken(name);
+            token = new NameToken(name);
             names.add(token);
             return token;
         }
+        return token;
 
     }
 
+    public NameToken addName(String name, int kind) {
+        return addName(name, kind, TokenType.NAME) ;
+    }
+
     public void addNameButPossiblyPrefix(String prefix, int kind) {
-        addName(prefix, NameParserConstants.NAME_WITH_NUMBERS).type=NameTokenType.PREFIX;
-       // System.out.println("prefix : " + kind + " --> " + NameParserConstants.tokenImage[kind]);
+        // e.g. if going left to right while scanning  Bill Saint Denis or Bill Saint
+        // we aren't quite sure if Saint is a prefix (as in Saint Denis) or a full on last name (bill saint).
+        // this depends on if another name is added.
+        addName(prefix, NameParserConstants.NAME_WITH_NUMBERS,TokenType.PREFIX);
     }
 
     public void addNickName(String name, int kind) {
@@ -237,31 +245,18 @@ public class Name implements Serializable {
 
     public String toDebugString() {
         StringBuilder builder = new StringBuilder(isCompany() ? "Company" : "");
-        if (!salutation.isEmpty()) builder.append("  salutation :" + salutation);
+        if (salutation!=null) builder.append("  salutation :" + salutation);
         if (!first.isEmpty()) builder.append("  first :" + first);
-        if (!middle.isEmpty()) builder.append("  middle :" + middle);
+        if (middle!=null) builder.append("  middle :" + middle);
         if (!nickNames.isEmpty()) builder.append("  nickNames :" + nickNames);
         if (!last.isEmpty()) builder.append("  last :" + last);
-        if (!relations.isEmpty()) builder.append("  relations :" + relations);
+        if (relation!=null) builder.append("  relation :" + relation);
         if (!titles.isEmpty()) builder.append("  titles:" + titles);
         return builder.toString();
     }
 
     public boolean isCompany() {
         return isCompany;
-    }
-
-    public String toNormalizedString() {
-            StringBuilder builder = new StringBuilder();
-            if (!salutation.isEmpty()) builder.append(toNormalizedString(salutation));
-            if (!first.isEmpty()) builder.append(toNormalizedString(first));
-            if (!middle.isEmpty()) builder.append(toNormalizedString(middle));
-            if (!nickNames.isEmpty()) builder.append(toNormalizedString( nickNames));
-            if (!last.isEmpty()) builder.append(toNormalizedString( last));
-            if (!relations.isEmpty()) builder.append(toNormalizedString( relations));
-            if (!titles.isEmpty()) builder.append(toNormalizedString(titles));
-            return builder.toString().trim();
-
     }
 
     private String toNormalizedString(List<? extends Token> tokens) {
@@ -276,7 +271,7 @@ public class Name implements Serializable {
     public @Nullable String getNamePrefix() {
         if ( names.size()==0) return null;
         Token previousName = names.get(names.size() - 1);
-        return previousName.type==NameTokenType.PREFIX ? previousName.value : null;
+        return previousName.type== TokenType.PREFIX ? previousName.value : null;
     }
 
 

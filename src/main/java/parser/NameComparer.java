@@ -153,10 +153,10 @@ public class NameComparer {
     }
 
     private int compareRelation(Name a, Name b) {
-        if (a.getRelationTokens().size()!=b.getRelationTokens().size()) {
+        if (a.getRelationToken().isEmpty() && b.getRelationToken().isEmpty()) {
             return -1;
         }
-        return a.getRelations().equalsIgnoreCase(b.getRelations()) ? 0 : -3;
+        return a.getRelation().equalsIgnoreCase(b.getRelation()) ? 0 : -3;
     }
 
 
@@ -167,7 +167,7 @@ public class NameComparer {
             return 0;
         }
         // if different, but only because one is omitted, then give some strength.
-        if (a.getSalutationTokens().isEmpty() || b.getSalutationTokens().isEmpty()) {
+        if (a.getSalutationToken().isEmpty() || b.getSalutationToken().isEmpty()) {
             return -1;                       // e.g. Jane Doe ?  Ms Jane Doe  x MEH
         }
         if (isSameGender(a,b)) {            // Mrs Jane Doe  ?  Ms Jane Doe x GOOD
@@ -181,19 +181,19 @@ public class NameComparer {
     }
 
     private boolean isSameGender(Name a, Name b) {
-        Preconditions.checkState(a.getSalutationTokens().size()==1 && b.getSalutationTokens().size()==1, "assumes you only have one of Mr/Mrs/Ms/Dr etc..");
+        Preconditions.checkState(!a.getSalutationToken().isEmpty() && !b.getSalutationToken().isEmpty(), "assumes you only have one of Mr/Mrs/Ms/Dr etc..");
         return getGender(a)==getGender(b);
     }
 
     private boolean isDifferentGender(Name a, Name b) {
-        Preconditions.checkState(a.getSalutationTokens().size()==1 && b.getSalutationTokens().size()==1, "assumes you only have one of Mr/Mrs/Ms/Dr etc..");
+        Preconditions.checkState(!a.getSalutationToken().isEmpty() && !b.getSalutationToken().isEmpty(), "assumes you only have one of Mr/Mrs/Ms/Dr etc..");
         Gender aGender = getGender(a);
         Gender bGender = getGender(b);
         return aGender.isDifferent(bGender);
     }
 
     private Gender getGender(Name name) {
-        Token salutation = name.getSalutationTokens().get(0);
+        Token salutation = name.getSalutationToken();
 
         switch (salutation.kind) {
             case NameParserConstants.MR:
@@ -213,11 +213,11 @@ public class NameComparer {
         if (a.getMiddle().equalsIgnoreCase(b.getMiddle())) {
             return 0;
         }
-        if (a.getMiddleTokens().isEmpty() || b.getMiddleTokens().isEmpty()) {
+        if (a.getMiddleToken().isEmpty() || b.getMiddleToken().isEmpty()) {
             return -1;
         }
-        NameToken af = a.getMiddleTokens().get(0);
-        NameToken bf = a.getMiddleTokens().get(0);
+        NameToken af = a.getMiddleToken();
+        NameToken bf = a.getMiddleToken();
 
         if (af.isInitial() && !bf.isInitial()) {
             return af.normalizedText.charAt(0)==bf.normalizedText.charAt(0)  ? -2 : -5;

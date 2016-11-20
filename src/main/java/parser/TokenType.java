@@ -1,0 +1,8 @@
+package parser;
+
+
+
+public enum TokenType {
+    NAME, PREFIX,SALUTATION, PERSONAL_TITLE, COMPANY_TITLE, TITLE, RELATION, NICK_NAME, EMPTY, INC
+}
+

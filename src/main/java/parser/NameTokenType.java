@@ -1,8 +1,0 @@
-package parser;
-
-
-
-public enum NameTokenType {
-    NAME, PREFIX,SALUTATION, PERSONAL_TITLE, COMPANY_TITLE, TITLE, RELATION, NICK_NAME, INC
-}
-

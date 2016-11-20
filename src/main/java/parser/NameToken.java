@@ -6,11 +6,18 @@ public class NameToken extends Token {
 
     Character initial;
 
-    NameToken(String value) {
-        super(value, NameParserConstants.NAME_WITH_NUMBERS, NameTokenType.NAME);
-
+    NameToken(String value,TokenType type) {
+        super(value, NameParserConstants.NAME_WITH_NUMBERS, TokenType.NAME);
         this.initial = maybeGetInitial(value);
+    }
 
+    NameToken(String value) {
+        this(value, TokenType.NAME);
+
+    }
+
+    NameToken() {
+        super(TokenType.NAME);
     }
     private Character maybeGetInitial(String value) {
         return ((value.length()==2 && value.endsWith(".")) || value.length() ==1) ?
