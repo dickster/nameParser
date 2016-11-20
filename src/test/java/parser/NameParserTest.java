@@ -238,47 +238,4 @@ public class NameParserTest  {
     }
 
 
-    @Test public void testNameComparison() {
-        NameResult a;
-        NameResult b;
-
-        a = parser.parseNames("Dr. John Watkins Smith III");
-        b = parser.parseNames("John W Smith");
-        NameMatch compare = new NameComparer().compare(a.get(0), b.get(0));
-
-        System.out.println(compare + " [ " + a + " <>? " + b + " ]");
-
-
-        a = parser.parseNames("Mrs J Doe");
-        b = parser.parseNames("John Doe");
-        compare = new NameComparer().compare(a.get(0), b.get(0));
-        System.out.println(compare + " [ " + a + " <>? " + b + " ]");
-
-
-        a = parser.parseNames("Mrs J Doe");
-        b = parser.parseNames("Mr John Doe");
-        compare = new NameComparer().compare(a.get(0), b.get(0));
-        System.out.println(compare + " [ " + a + " <>? " + b + " ]");
-
-        a = parser.parseNames("Mrs J Doe");
-        b = parser.parseNames("Mr John Doe");
-        compare = new NameComparer().compare(a.get(0), b.get(0));
-        System.out.println(compare + " [ " + a + " <>? " + b + " ]");
-
-        a = parser.parseNames("Ms Jane Q  Doe The Second");
-        b = parser.parseNames("Jane Q Doe II");
-        compare = new NameComparer().compare(a.get(0), b.get(0));
-        System.out.println(compare + " [ " + a + " <>? " + b + " ]");
-
-        a = parser.parseNames("Ms Jane Q  Doe The Second");
-        b = parser.parseNames("Ms Jane Q  Doe The Second");
-        compare = new NameComparer().compare(a.get(0), b.get(0));
-        System.out.println(compare + " [ " + a + " <>? " + b + " ]");
-
-        a = parser.parseNames("Mrs J Doe");
-        b = parser.parseNames("Mr John Doe");
-        compare = new NameComparer().compare(a.get(0), b.get(0));
-        System.out.println(compare + " [ " + a + " <>? " + b + " ]");
-
-    }
 }

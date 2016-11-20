@@ -4,8 +4,7 @@ package parser;
 public enum NameMatch {
     NONE,
     WEAK,
-    PROBABLE,
-    VERY_PROBABLE,
+    POSSIBLE,
     GOOD,
     VERY_GOOD,
     STRONG,

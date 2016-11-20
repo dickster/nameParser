@@ -14,7 +14,7 @@ public class NameComparer {
 
         public boolean isDifferent(Gender g) {
             return (this==Neutral || g==Neutral) ? false :
-                    this.equals(g);
+                    !this.equals(g);
         }
     }
 
@@ -37,89 +37,109 @@ public class NameComparer {
         // TODO : assert there are only 1 first name tokens.
         int strength = 0;
 
+//        System.out.print("last:");
         strength += compareLast(a,b);
+
+//        System.out.print(strength + "\nfirst:");
         strength += compareFirst(a,b);
+
+//        System.out.print(strength + "\npersoncompany:");
         strength += comparePersonCompany(a, b);
-        strength += compareTitle(a,b);
+
+//        System.out.print(strength + "\ntitles:");
+        strength += compareTitles(a, b);
+
+//        System.out.print(strength + "\nsalutation:");
         strength += compareSalutation(a,b);
+
+//        System.out.print(strength + "\nrelation:");
         strength += compareRelation(a,b);
+
+//        System.out.print(strength + "\nmiddle:");
         strength += compareMiddleName(a,b);
 
+//        System.out.print(strength + "\n:");
+
         return strengthToMatch(strength);
-        // if company/person different  & first/last match then WEAK
-        // if first & last the same return PROBABLE.      minimal match.
-        // if salutation & relation different only because one is blank, GOOD
-        // if salutation & relation  the same VERY_GOOD
-        // if title only different because one is blank, VERY_GOOD+
-        // if title.   STRONG
-        // if middle name different only because one is blank, ++
-        // if middle name/inc  DEFINITE.
-        //
-       // return NameMatch.WEAK;
     }
 
     private NameMatch strengthToMatch(int strength) {
         System.out.println(" strength " + strength);
-        if (strength<4) {
+        if (strength<7) {
             return NameMatch.NONE;
         }
         else if (strength<9) {
             return NameMatch.WEAK;
         }
         else if (strength<10) {
-                return NameMatch.PROBABLE;
-        }
-        else if (strength<11) {
-                return NameMatch.VERY_PROBABLE;
+                return NameMatch.POSSIBLE;
          }
-        else if (strength<12) {
+        else if (strength<11) {
                 return NameMatch.GOOD;
         }
-        else if (strength<13) {
+        else if (strength<12) {
                 return NameMatch.VERY_GOOD;
         }
-        else if (strength<14) {
+        else if (strength<13) {
                 return NameMatch.STRONG;
         }
-        else if (strength<15) {
+        else if (strength<14) {
                 return NameMatch.VERY_STRONG;
         }
         return NameMatch.DEFINITE;
     }
 
 
-    private int compareLast(Name a, Name b)  {
-        return (a.getLast().equalsIgnoreCase(b.getLast())) ? 5 : Integer.MIN_VALUE;
+    private int compareLast(Name a, Name b) {
+        // TODO : allow partial match for hyphenated names.
+        // e.g.   Alice Jones-Smith    Alice Jones   =  9/2;
+        return (a.getLast().equalsIgnoreCase(b.getLast())) ? 9 : -50;
     }
 
     private int compareFirst(Name a, Name b)  {
 
         NameToken af = a.getFirstTokens().get(0);
-        NameToken bf = a.getFirstTokens().get(0);
-        if (af.isInitial || bf.isInitial) {
-            return af.normalizedText.charAt(0)==bf.normalizedText.charAt(0)  ? 2 : 0;
+        NameToken bf = b.getFirstTokens().get(0);
+        if (af.isInitial() || bf.isInitial()) {
+            return af.normalizedText.charAt(0)==bf.normalizedText.charAt(0)  ? 1 : -10;
         }
-        return (a.getFirst().equals(b.getFirst())) ? 4 : 0;
+        return (a.getFirst().equalsIgnoreCase(b.getFirst())) ? 6 : -10;
     }
 
 
-    private int compareTitle(Name a, Name b) {
+    private int compareTitles(Name a, Name b) {
         //careful here. this is a unordered set.  could be
         // joe smith Phd, LLB   or joe smith LLB,Phd.
         // .: can't just compare concatenated string like we usually do.
-        return compareTokenList(a.getTitleTokens(), b.getTitleTokens(), 2, 0);
+        return compareTokenList(a.getTitleTokens(), b.getTitleTokens(), 0, -4);
     }
 
     private int compareTokenList(List<NameToken> a, List<NameToken> b, int match, int nomatch) {
-        if (a.size()!=b.size()) {
-            return nomatch;
+        int partialMatch = (nomatch + match) /2;
+        if (a.isEmpty() ||  b.isEmpty()) {
+            return 0;
         }
-        for (int i = 0;i < a.size(); i++ ) {
-            if (!compareInList(a.get(i), b)) {
-                return nomatch;
+
+        if (a.isEmpty() || b.isEmpty()) {
+            return partialMatch;
+        }
+        int matches = 0;
+        // compare shorter list .
+        // eg. john doe Phd Md   john Doe md
+        // just try to match the Md.  if phd doesn't match that's not as serious as Md not matching.
+        List<NameToken> source = a.size()<b.size() ? a : b;
+        List<NameToken> otherTitleList = source==a ? b : a;
+
+
+        for (int i = 0;i < source.size(); i++ ) {
+            if (compareInList(source.get(i), otherTitleList)) {
+                matches++;
             }
         }
-        return match;
+        if (matches==source.size()) {
+            return source.size()==otherTitleList.size() ? match : partialMatch;
+        }
+        return nomatch;
     }
 
     private boolean compareInList(NameToken token, List<NameToken> tokens) {
@@ -132,30 +152,30 @@ public class NameComparer {
     }
 
     private int compareRelation(Name a, Name b) {
-        return a.getRelations().equalsIgnoreCase(b.getRelations()) ? 1 : 0;
+        if (a.getRelationTokens().size()!=b.getRelationTokens().size()) {
+            return -1;
+        }
+        return a.getRelations().equalsIgnoreCase(b.getRelations()) ? 0 : -3;
     }
 
 
     private int compareSalutation(Name a, Name b) {
 
-        // TODO : check for gender.  Ms & Mrs are +2.
-        // complete match is +3.
-        // no match, but because one is ommitted = +1   e.g. Mr John Doe ?=  John Doe
-        // Mr <>  Mrs/Ms/Miss are -4;
-        // other differences are -1.   Dr Joe & Prof Joe : -1
-        if (a.getSalutation().equalsIgnoreCase(b.getSalutation())) {  // complete match.
-            return 3;
+        // same salutation add to strength.
+        if (a.getSalutation().equalsIgnoreCase(b.getSalutation())) {
+            return 0;
         }
+        // if different, but only because one is omitted, then give some strength.
         if (a.getSalutationTokens().isEmpty() || b.getSalutationTokens().isEmpty()) {
-            return 1;                       // Jane Doe ?  Ms Jane Doe
+            return -1;                       // e.g. Jane Doe ?  Ms Jane Doe  x MEH
         }
-        if (isSameGender(a,b)) {            // Mrs Jane Doe  ?  Ms Jane Doe
-            return 2;
-        }
-        if (isDifferentGender(a,b)) {      // Mrs John Doe ? Mr John Doe
+        if (isSameGender(a,b)) {            // Mrs Jane Doe  ?  Ms Jane Doe x GOOD
             return -4;
         }
-        // assume neutral differences.  Prof John Doe ?  Mr John Doe
+        if (isDifferentGender(a,b)) {      // Mrs John Doe ? Mr John Doe   x BAD
+            return -8;
+        }
+        // assume neutral differences.  Prof John Doe ?  Mr John Doe   x JUST A LITTLE BAD
         return -1;
     }
 
@@ -189,23 +209,31 @@ public class NameComparer {
 
 
     private int compareMiddleName(Name a, Name b) {
-        if (a.getMiddleTokens().size()!=b.getMiddleTokens().size()) {
-            return -1;
-        }
-        if (a.getMiddleTokens().size()==0) {
+        if (a.getMiddle().equalsIgnoreCase(b.getMiddle())) {
             return 0;
+        }
+        if (a.getMiddleTokens().isEmpty() || b.getMiddleTokens().isEmpty()) {
+            return -1;
         }
         NameToken af = a.getMiddleTokens().get(0);
         NameToken bf = a.getMiddleTokens().get(0);
-        if (af.isInitial || bf.isInitial) {
-            return af.normalizedText.charAt(0)==bf.normalizedText.charAt(0)  ? 1 : 0;
+
+        if (af.isInitial() && !bf.isInitial()) {
+            return af.normalizedText.charAt(0)==bf.normalizedText.charAt(0)  ? -2 : -5;
         }
-        return (a.getFirst().equals(b.getFirst())) ? 2 : 0;
+        if (af.isInitial() && !bf.isInitial()) {
+            return af.normalizedText.charAt(0)==bf.normalizedText.charAt(0)  ? -2 : -5;
+        }
+        if (af.isInitial() && bf.isInitial()) {
+            return af.normalizedText.charAt(0)==bf.normalizedText.charAt(0)  ? 0 : -5;
+        }
+        return -5;
+
     }
 
 
     private int comparePersonCompany(Name a, Name b)  {
-        return (a.isCompany()!=b.isCompany()) ? 1 : -3;
+        return (a.isCompany()==b.isCompany()) ? 0 : -5;
     }
 
 

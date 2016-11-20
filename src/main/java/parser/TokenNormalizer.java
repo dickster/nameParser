@@ -54,7 +54,7 @@ public class TokenNormalizer {
 
     private void normalize(List<NameToken> tokens) {
         for (NameToken token:tokens) {
-            normalize(token);
+            token.normalizedText = normalize(token);
         }
     }
 
@@ -64,10 +64,10 @@ public class TokenNormalizer {
         if (result==null) {
             return token.value;
         }
-        //arbitrarily decide that initials always have dot.
+        //arbitrarily decide that initials always end in dot.
         // George W Bush  -->  George W. Bush
-        if (token.isInitial && token.value.length()==1) {
-            token.value = token.value+".";
+        if (token.isInitial()) {
+            token.value = token.initial+".";
         }
         if (result.contains("%s")) {
             return String.format(result, token.value);
