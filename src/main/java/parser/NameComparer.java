@@ -2,6 +2,7 @@ package parser;
 
 
 import com.google.common.base.Preconditions;
+import parser.jj.NameParserConstants;
 
 import java.util.List;
 

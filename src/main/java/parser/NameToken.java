@@ -1,6 +1,7 @@
 package parser;
 
 import com.google.common.base.Preconditions;
+import parser.jj.NameParserConstants;
 
 // TODO : extend this class so there is salutationToken, titleToken, relationToken
 public class NameToken  {

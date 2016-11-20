@@ -1,6 +1,7 @@
 package parser;
 
 import com.google.common.collect.ImmutableMap;
+import parser.jj.NameParserConstants;
 
 import java.util.List;
 import java.util.Map;

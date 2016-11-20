@@ -12,7 +12,7 @@ options
 }
 
 PARSER_BEGIN(NameParser)
-package parser;
+package parser.jj;
 
 import java.io.*;
 import java.util.*;

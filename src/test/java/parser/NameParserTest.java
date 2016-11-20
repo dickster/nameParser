@@ -3,6 +3,7 @@ package parser;
 import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
+import parser.jj.NameParser;
 
 import java.util.List;
 

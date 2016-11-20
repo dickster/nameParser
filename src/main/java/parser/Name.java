@@ -2,6 +2,7 @@ package parser;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import parser.jj.NameParserConstants;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
